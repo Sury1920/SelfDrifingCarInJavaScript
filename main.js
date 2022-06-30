@@ -1,21 +1,33 @@
 const canvas=document.getElementById("myCanvas");
-canvas.width=200;
+canvas.width=400;
 
 const ctx = canvas.getContext("2d");
-const road = new Road (canvas.width/2, canvas.width * 0.9);
-const car = new Car(road.getLaneCenter(1),100,30,50);
+const road = new Road (canvas.width/2, canvas.width * 0.6);
+const car = new Car(road.getLaneCenter(1),100,30,50, "KEYS");
+
+const traffic=[
+    new Car(road.getLaneCenter(1), -100, 30, 50, "DUMMY", 3)
+];
 
 animate();
 
 function animate() {
-    car.update(road.borders);
+    for (let i = 0; i < traffic.length; i++) {
+        traffic[i].update(road.borders,[]);        
+    }
+    car.update(road.borders, traffic);
     canvas.height=window.innerHeight;
     
     ctx.save(); //save context
     ctx.translate(0,-car.y + canvas.height*0.7); // move 'camera' with the car
     
     road.draw(ctx); //draw road lanes
-    car.draw(ctx); // draw the car
+    
+    for (let i = 0; i < traffic.length; i++) {
+        traffic[i].draw(ctx, "blue");        
+    }
+
+    car.draw(ctx, "red"); // draw the car
 
     ctx.restore(); // restore context
     requestAnimationFrame(animate);
