@@ -14,8 +14,13 @@ class Car {
         this.friction = 0.05;
         this.angle = 0;
         this.damaged=false;
+
+        this.useBrain=controlType=="AI";
+
         if(controlType!="DUMMY"){
             this.sensor = new Sensor(this);
+            this.brain = new NeuralNetwork(     // add the connection to the Neural Network
+                [this.sensor.rayCount,6,4]);    // specyfing number of layers and neurons in each layer
         }
             this.controls = new Controls(controlType);
     }
@@ -26,8 +31,21 @@ class Car {
             this.polygon=this.#createPolygon();
             this.damaged=this.#assessDamage(roadBorders, traffic);
         }
-        if(this.sensor)
+        if(this.sensor){
             this.sensor.update(roadBorders, traffic);
+            const offsets=this.sensor.readings.map(
+                s=>s==null?0:1-s.offset);    // if sensor not reading anything - set its value to 0, else 1-offset to receive low values if the object is far and high values if object is close
+            
+            const outputs=NeuralNetwork.feedForward(offsets, this.brain);
+            console.log(outputs);
+
+            if(this.useBrain){
+                this.controls.forward=outputs[0];
+                this.controls.left=outputs[1];
+                this.controls.right=outputs[2];
+                this.controls.reverse=outputs[3];
+            }
+        }
     }
 
     #assessDamage(roadBorders, traffic) {
@@ -50,20 +68,20 @@ class Car {
         const rad=Math.hypot(this.width,this.height)/2; // get rect's 'radius'
         const alpha=Math.atan2(this.width, this.height); // get angle between x axis and radius
         points.push({
-            x:this.x-Math.sin(this.angle-alpha)*rad,    // top right x
-            y:this.y-Math.cos(this.angle-alpha)*rad     // top right y
+            x:this.x-Math.sin(this.angle-alpha)*rad,    
+            y:this.y-Math.cos(this.angle-alpha)*rad     
         });        
         points.push({
-            x:this.x-Math.sin(this.angle+alpha)*rad,    // top right x
-            y:this.y-Math.cos(this.angle+alpha)*rad     // top right y
+            x:this.x-Math.sin(this.angle+alpha)*rad,    
+            y:this.y-Math.cos(this.angle+alpha)*rad     
         });
         points.push({
-            x:this.x-Math.sin(Math.PI+this.angle-alpha)*rad,    // top right x
-            y:this.y-Math.cos(Math.PI+this.angle-alpha)*rad     // top right y
+            x:this.x-Math.sin(Math.PI+this.angle-alpha)*rad,    
+            y:this.y-Math.cos(Math.PI+this.angle-alpha)*rad     
         });        
         points.push({
-            x:this.x-Math.sin(Math.PI+this.angle+alpha)*rad,    // top right x
-            y:this.y-Math.cos(Math.PI+this.angle+alpha)*rad     // top right y
+            x:this.x-Math.sin(Math.PI+this.angle+alpha)*rad,    
+            y:this.y-Math.cos(Math.PI+this.angle+alpha)*rad     
         });
         return points;
     }
@@ -123,7 +141,7 @@ class Car {
             var img = new Image();
             img.src = "pink_car.png";
             img.onload = function() {
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            ctx.drawImage(img, 0, 0, carCanvas.width, carCanvas.height);
             }
         }
 

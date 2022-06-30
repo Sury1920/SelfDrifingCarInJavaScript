@@ -14,17 +14,15 @@ class NeuralNetwork {
             outputs=Level.feedForward(                          // and get the outputs
                 outputs, network.levels[i]);                    // for each network level
         }
-        return outputs;
+        return outputs;                                         // return the final outputs
     }
 
 }
 
-
-
 class Level {
     constructor(inputCount, outputCount) {
         this.inputs = new Array(inputCount);                    // Array of inputs
-        this.output = new Array (outputCount);                  // Array of outputs
+        this.outputs = new Array (outputCount);                  // Array of outputs
         this.biases = new Array (outputCount);                  // Array of biases
 
         this.weights=[]; // Array of weights
@@ -41,7 +39,7 @@ class Level {
             }
         }
         // pick random biases
-        for (let i=0; i<level.biases.lenght; i++) {             // for each output in given level...
+        for (let i=0; i<level.biases.length; i++) {             // for each output in given level...
             level.biases[i]=Math.random()*2-1;                  // assign bias value between -1 and 1
         }
     }
@@ -50,18 +48,17 @@ class Level {
         for (let i = 0; i < level.inputs.length; i++) {         // for each input
             level.inputs[i]=givenInputs[i];                     // assign value from the car sensors
         }
-        for (let i = 0; i < level.output.length; i++) {         // for each output
+        for (let i = 0; i < level.outputs.length; i++) {         // for each output
             let sum = 0;                                        // 1.   calculate sum
-            for (let j = 0; j < level.input.length; j++) {      //      consisting of
-                sum+=level.input[j]*level.weights[j][i];        //      each input value * weight of each input-output pair
+            for (let j = 0; j < level.inputs.length; j++) {      //      consisting of
+                sum+=level.inputs[j]*level.weights[j][i];        //      each input value * weight of each input-output pair
             }
             if(sum>level.biases[i]) {                           // 2.   check if sum is greater than this output's bias value
                 level.outputs[i]=1;                             //      if so - activate the output
             } else {
                 level.outputs[i]=0;                             //      else - don't activate it
             }
-        }    
+        }
+        return level.outputs;    
     }
-
-
 }
