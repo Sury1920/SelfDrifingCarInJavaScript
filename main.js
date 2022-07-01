@@ -9,6 +9,7 @@ const networkCtx = networkCanvas.getContext("2d");
 const road = new Road(carCanvas.width/2, carCanvas.width * 0.6);   // define the road dimensions
 
 let currentGeneration = 0;
+let bestDistance = 0;
 
 function decide(value){ //onclick function for both decision buttons (they send value 'train'/'test' as argument)
     startApp(value);
@@ -36,6 +37,7 @@ function startApp(mode) {
 
     //add details to textarea
     addToDetails(`${mode} Epoch: ${currentGeneration} \n\n`);
+    addToDetails(`Best Distance: ${Math.floor(-bestDistance)} \n\n`);
     addToDetails(`Current best Brain: \n\n ${localStorage.getItem("bestBrain")} \n\n------------------------------------------\n\n`);
 
     let bestCar=cars[0];                        // define best car and set to the first car at the start
@@ -46,7 +48,7 @@ function startApp(mode) {
             
             // MUTATE THE NETWORK
                 if (i!=0) {
-                NeuralNetwork.mutate(cars[i].brain,0.1); // <- value to tweak similarity of cars' brains
+                NeuralNetwork.mutate(cars[i].brain, 0.7 - (currentGeneration * 0.02)); // <- value to tweak similarity of cars' brains
             }
         }
     }
@@ -93,6 +95,7 @@ function startApp(mode) {
     function removeCar () {
         localStorage.removeItem("bestBrain");
         currentGeneration = 0;
+        bestDistance = 0;
         startApp("train")
     }
 
@@ -125,6 +128,13 @@ function startApp(mode) {
 
         if(cars.filter(car=> car.damaged).length == cars.length){
             currentGeneration += 1;
+            let tempBest = bestCar.y
+            console.log(bestCar.y)
+            console.log(tempBest)
+            console.log(bestDistance)
+            console.log(tempBest > bestDistance)
+            if(tempBest < bestDistance) bestDistance = tempBest;
+            console.log(bestDistance)
             saveCar();
             startApp(mode)
         }
