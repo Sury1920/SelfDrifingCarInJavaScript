@@ -1,51 +1,49 @@
 class Visualizer{
     static drawNetwork(ctx,network){
-        const margin=50;
-        const left=margin;
-        const top=margin;
-        const width=ctx.canvas.width-margin*2;
-        const height=ctx.canvas.height-margin*2;
+        const margin = 50;
+        const left = margin;
+        const top = margin;
+        const width = ctx.canvas.width - margin * 2;
+        const height = ctx.canvas.height - margin * 2;
 
         const levelHeight=height/network.levels.length;
 
-        for(let i=network.levels.length-1;i>=0;i--){
-            const levelTop=top+
-                lerp(
-                    height-levelHeight,
-                    0,
-                    network.levels.length==1
-                        ?0.5
-                        :i/(network.levels.length-1)
-                );
+        for(let i = network.levels.length-1; i >= 0; i--){
+            const levelTop = top + lerp(
+                                    height-levelHeight,
+                                    0,
+                                    network.levels.length == 1 ? 0.5 : i / (network.levels.length - 1)
+                                    );
 
             ctx.setLineDash([7,3]);
+
             Visualizer.drawLevel(ctx,network.levels[i],
                 left,levelTop,
                 width,levelHeight,
-                i==network.levels.length-1
-                    ?['⇧','⇦','⇨','⇩']
-                    :[]
+                i == network.levels.length - 1 ? ['⇧','⇦','⇨','⇩'] : []
             );
         }
     }
 
-    static drawLevel(ctx,level,left,top,width,height,outputLabels){
-        const right=left+width;
-        const bottom=top+height;
+    static drawLevel(ctx, level, left, top, width, height, outputLabels){
+        const right = left + width;
+        const bottom = top + height;
 
-        const {inputs,outputs,weights,biases}=level;
+        const { inputs, outputs, weights, biases } = level;
 
-        for(let i=0;i<inputs.length;i++){
-            for(let j=0;j<outputs.length;j++){
+        for(let i = 0; i < inputs.length; i++){
+            for(let j = 0; j < outputs.length; j++){
                 ctx.beginPath();
                 ctx.moveTo(
                     Visualizer.#getNodeX(inputs,i,left,right),
                     bottom
                 );
+
                 ctx.lineTo(
                     Visualizer.#getNodeX(outputs,j,left,right),
                     top
                 );
+
                 ctx.lineWidth=2;
                 ctx.strokeStyle=getRGBA(weights[i][j]);
                 ctx.stroke();
@@ -98,13 +96,11 @@ class Visualizer{
         }
     }
 
-    static #getNodeX(nodes,index,left,right){
+    static #getNodeX(nodes, index, left, right){
         return lerp(
             left,
             right,
-            nodes.length==1
-                ?0.5
-                :index/(nodes.length-1)
+            nodes.length == 1 ? 0.5 : index / (nodes.length - 1)
         );
     }
 }

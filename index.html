@@ -9,13 +9,27 @@
 </head>
 <body>
         <div id='buttons'>
-            <div id="saveButtons"></div>
+            <div id="inGameButtons" style="display:none; width:100%; justify-content: space-around">
+                <button id="buttonSaveCar">💾</button>
+                <button id="buttonRemoveCar">🗑️</button>
+            </div>   
+            
+            <div id="decisionButtons" style="display: flex; flex-direction: column;">
+                <button id="buttonTrain" onClick="decide('train')">🎓</button>
+                <button id="buttonTest" onClick="decide('test')">🎲</button>
+                <button id="buttonShowData" onClick="showDetails()">Show Data</button>
+            </div>
         </div>
-        <div id='stats'></div>
 
-        <canvas id="carCanvas"></canvas>
+        <div id="divCanvas"style="display: none">
+            <canvas id="carCanvas"></canvas>
+            <canvas id="networkCanvas"></canvas>
+        </div>
 
-        <canvas id="networkCanvas"></canvas>
+        <div id="divShowData">
+            <textarea id="textData"></textarea>
+        </div>
+
         <script src="visualizer.js"></script>
         <script src="network.js"></script>
         <script src="sensor.js"></script>
@@ -25,7 +39,5 @@
         <script src="car.js"></script>
         <script src="interface.js"></script>
         <script src="main.js"></script>
-
-
  </body>
 </html>

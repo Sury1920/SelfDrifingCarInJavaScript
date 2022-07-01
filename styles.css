@@ -4,13 +4,8 @@ body {
     overflow: hidden;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: space-around;
 }
-#buttons {
-    display:flex;
-    flex-direction: column;
-}
-
 button {
     background-color: lightblue;
     color: black;
@@ -20,9 +15,14 @@ button {
     margin:5px;
     cursor: pointer;
 }
+
 button:hover {
     background-color: darkblue;
     color: yellow;
+}
+
+#decisionButtons button{
+    width:90%;
 }
 
 #networkCanvas {
@@ -30,4 +30,17 @@ button:hover {
 }
 #carCanvas {
     background-color: lightsteelblue;
+}
+
+#divShowData{
+    display: none;
+    background-color: lightgray; 
+    width:100%; height:100%; 
+    vertical-align: top; 
+    text-align:center;
+}
+#textData{
+    width:100%; 
+    height:98vh; 
+    overflow-y: scroll;
 }

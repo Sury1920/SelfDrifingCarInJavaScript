@@ -1,4 +1,3 @@
-
 const carCanvas=document.getElementById("carCanvas");
 const networkCanvas=document.getElementById("networkCanvas");
 
@@ -7,64 +6,37 @@ networkCanvas.width=400;
 const carCtx = carCanvas.getContext("2d");
 const networkCtx = networkCanvas.getContext("2d");
 
-const road = new Road (carCanvas.width/2, carCanvas.width * 0.6);   // define the road dimensions
+const road = new Road(carCanvas.width/2, carCanvas.width * 0.6);   // define the road dimensions
 
-let mode = "train";
-addTrainTestButtons();
+let currentGeneration = 0;
 
-
-function train(){
-    mode = "train"
-    startApp();
-}
-function test(){
-    mode = "test"
-    startApp();
+function decide(value){ //onclick function for both decision buttons (they send value 'train'/'test' as argument)
+    startApp(value);
 }
 
+function startApp(mode) {
 
-function startApp() {
+    console.log('start')
+    //changing the view
+    document.getElementById('inGameButtons').style.display = "flex";
+    document.getElementById('divCanvas').style.display = "flex";
+    // document.getElementById('divShowData').style.display = "block";
 
-    //add save/remove buttons - TO REFACTOR IF POSSIBLE
-
-    saveButtons= document.getElementById("saveButtons");
-
-    var child = saveButtons.lastElementChild;
-    while (child) {
-        saveButtons.removeChild(child);
-        child = saveButtons.lastElementChild;
-    }
-
-    let buttonSave = document.createElement("button");
-        buttonSave.innerHTML = "💾";
-        buttonSave.onclick = saveCar;
-    let buttonRemove = document.createElement("button");
-        buttonRemove.innerHTML = "🗑️";
-        buttonRemove.onclick = removeCar;
-    saveButtons.append(buttonSave);
-    saveButtons.append(buttonRemove);
-
-    // define function to save the best car's 'brain' in local storage
-    function saveCar () {
-        localStorage.setItem("bestBrain", JSON.stringify(bestCar.brain));
-    }
-
-    // define function to remove brain from the local storage
-    function removeCar () {
-        localStorage.removeItem("bestBrain");
-    }
+    //setting onclick functions for new buttons
+    document.getElementById('buttonSaveCar').onclick = saveCar; //saves the car you are currently focused on as new 'bestBrain'
+    document.getElementById('buttonRemoveCar').onclick = removeCar; //removes current 'bestBrain'
 
 
 
     // GENERATE N NUMBER OF AI CARS
-
     let N=500;
 
-    // if (mode=="test") {
-    //     N = 1;
-    // }
     const cars = generateCars(N);                // create an array of N AI cars
     let traffic=[];
+
+    //add details to textarea
+    addToDetails(`${mode} Epoch: ${currentGeneration} \n\n`);
+    addToDetails(`Current best Brain: \n\n ${localStorage.getItem("bestBrain")} \n\n------------------------------------------\n\n`);
 
     let bestCar=cars[0];                        // define best car and set to the first car at the start
     if (localStorage.getItem("bestBrain")) {    // if there is a best car saved in the local storage
@@ -73,19 +45,17 @@ function startApp() {
                 localStorage.getItem("bestBrain"));
             
             // MUTATE THE NETWORK
-            
-            
                 if (i!=0) {
                 NeuralNetwork.mutate(cars[i].brain,0.1); // <- value to tweak similarity of cars' brains
             }
         }
     }
 
-
     // CONTROLL THE TRAFFIC
 
     if (mode=="train") // IF USING TRAINING MODE
     {
+        console.log("train")
         traffic=[
             new Car(road.getLaneCenter(1), -100, 30, 50, "DUMMY", 3),
             new Car(road.getLaneCenter(2), -300, 30, 50, "DUMMY", 4),
@@ -98,9 +68,9 @@ function startApp() {
             new Car(road.getLaneCenter(0), -700, 30, 50, "DUMMY", 3)
         ];
     }
-    if (mode=="test") // IF USING TEST MODE
+    else // IF USING TEST MODE
     {
-        randomVehicleCount = 12;
+        randomVehicleCount = 24;
         traffic=[];
         for (let i = 0; i < randomVehicleCount/2; i++) {
             randomVehicleBehind = new Car(road.getLaneCenter(getRandomInt(0,2)), getRandomInt(200,800)*(randomVehicleCount/6), 30, 50, "DUMMY", 6);
@@ -109,20 +79,21 @@ function startApp() {
             traffic.push(randomVehicleInFront);
         }
     }
-
     animate();
 
 
     // FUNCTION DEFINITIONS
 
     // define function to save the best car's 'brain' in local storage
-    function save () {
-        localStorage.setItem("bestBrain", JSON.stringify(bestCar.brain));       // <- THIS LINE TO BE CHANGED TO INCLUDE AVERAGE RATHER THEN BEST CAR'S BRAIN
+    function saveCar () {
+        localStorage.setItem("bestBrain", JSON.stringify(bestCar.brain));
     }
-
+    
     // define function to remove brain from the local storage
-    function remove () {
+    function removeCar () {
         localStorage.removeItem("bestBrain");
+        currentGeneration = 0;
+        startApp("train")
     }
 
     function getRandomInt(min, max) {
@@ -147,16 +118,16 @@ function startApp() {
             cars[i].update(road.borders, traffic);
         }
 
+
         // FITNESS FUNCTION -- to play around with
         bestCar = cars.find(c=>c.y==Math.min(...cars.map(c=>c.y))); // define best car as the one with lowest y value
         
-        // bestTopAverage
-        // 
-        // To improve @Filip Sz. if possible
-        // get 10 best cars and have bestTopAverage instead??
-        // 
-        // 
-        // 
+
+        if(cars.filter(car=> car.damaged).length == cars.length){
+            currentGeneration += 1;
+            saveCar();
+            startApp(mode)
+        }
 
         carCanvas.height=window.innerHeight;
         networkCanvas.height=window.innerHeight;
@@ -181,6 +152,14 @@ function startApp() {
 
         networkCtx.lineDashOffset=-time/50;
         Visualizer.drawNetwork(networkCtx, bestCar.brain);  //use external library to visualise the network
-        requestAnimationFrame(animate);
+        if(cars.filter(car=> car.damaged).length !== cars.length) requestAnimationFrame(animate);
     }
+}
+
+function showDetails(){
+    document.getElementById('divShowData').style.display = document.getElementById('divShowData').style.display == '' ?  'block' : '';
+}
+
+function addToDetails(value){
+    document.getElementById('textData').value += value;
 }

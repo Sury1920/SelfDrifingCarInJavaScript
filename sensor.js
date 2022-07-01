@@ -27,9 +27,7 @@ class Sensor {
                 roadBorders[i][0], 
                 roadBorders[i][1]
             );
-            if(touch) {
-                touches.push(touch);
-            }
+            if(touch) touches.push(touch);
         }
 
         for (let i = 0; i < traffic.length; i++) {
@@ -41,18 +39,13 @@ class Sensor {
                     poly[j],
                     poly[(j+1)%poly.length]
                 );
-                if (value) {
-                    touches.push(value)
-                }
+                if (value) touches.push(value)
             }
                 
         }
             
-    
-
-        if(touches.length==0){
-            return null;
-        } else {
+        if(touches.length==0)return null;
+        else {
             const offsets=touches.map(e=>e.offset);
             const minOffset = Math.min(...offsets);
             return touches.find(e=>e.offset==minOffset);
@@ -63,16 +56,15 @@ class Sensor {
         this.rays=[];
         for (let index = 0; index < this.rayCount; index++) {
             const rayAngle = lerp(
-                this.raySpread/2,
-                -this.raySpread/2,
-                this.rayCount==1?0.5:index/(this.rayCount-1)
-            )+this.car.angle;
-            const start = {x:this.car.x, y:this.car.y};
+                this.raySpread / 2,
+                -this.raySpread / 2,
+                this.rayCount == 1 ? 0.5 : index / (this.rayCount-1)
+            ) + this.car.angle;
+            
+            const start = { x: this.car.x, y: this.car.y };
             const end = {
-                x:this.car.x-
-                    Math.sin(rayAngle)*this.rayLength,
-                y:this.car.y-
-                    Math.cos(rayAngle)*this.rayLength
+                x: this.car.x - Math.sin(rayAngle) * this.rayLength,
+                y: this.car.y - Math.cos(rayAngle) * this.rayLength
             };
             this.rays.push([start, end]);
         }
@@ -82,9 +74,9 @@ class Sensor {
         //draw the ray until intersection
         for (let i = 0; i < this.rayCount; i++) {
             let end = this.rays[i][1];
-            if(this.readings[i]){
-                end = this.readings[i];
-            }
+
+            if(this.readings[i])end = this.readings[i];
+
             ctx.beginPath();
             ctx.lineWidth=1;
             ctx.strokeStyle="yellow";
@@ -92,19 +84,21 @@ class Sensor {
                 this.rays[i][0].x,
                 this.rays[i][0].y
             );
+
             ctx.lineTo(
                 end.x,
                 end.y
             );
+
             ctx.stroke();
         }
 
         //draw the inactive part of ray
         for (let i = 0; i < this.rayCount; i++) {
             let end = this.rays[i][1];
-            if(this.readings[i]){
-                end = this.readings[i];
-            }
+
+            if(this.readings[i]) end = this.readings[i];
+            
             ctx.beginPath();
             ctx.lineWidth=1;
             ctx.strokeStyle="grey";
@@ -112,10 +106,12 @@ class Sensor {
                 this.rays[i][1].x,
                 this.rays[i][1].y
             );
+            
             ctx.lineTo(
                 end.x,
                 end.y
             );
+            
             ctx.stroke();
         }
     }

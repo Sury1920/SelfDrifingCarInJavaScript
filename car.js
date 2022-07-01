@@ -1,5 +1,3 @@
-
-
 class Car {
     //Object constructor
     constructor(x,y,width,height, controlType, maxSpeed=5) {
@@ -13,30 +11,32 @@ class Car {
         this.maxSpeed = maxSpeed;
         this.friction = 0.05;
         this.angle = 0;
-        this.damaged=false;
+        this.damaged = false;
 
-        this.useBrain=controlType=="AI";
+        this.useBrain = controlType == "AI";
 
-        if(controlType!="DUMMY"){
+        if(controlType != "DUMMY"){
             this.sensor = new Sensor(this);
-            this.brain = new NeuralNetwork(     // add the connection to the Neural Network
-                [this.sensor.rayCount,6,4]);    // specyfing number of layers and neurons in each layer
+            this.brain = new NeuralNetwork([this.sensor.rayCount,6,4]); // add the connection to the Neural Network  // specyfing number of layers and neurons in each layer
         }
-            this.controls = new Controls(controlType);
+        
+        this.controls = new Controls(controlType);
     }
 
     update(roadBorders, traffic){
         if(!this.damaged) {
             this.#move();   
-            this.polygon=this.#createPolygon();
-            this.damaged=this.#assessDamage(roadBorders, traffic);
+            this.polygon = this.#createPolygon();
+            this.damaged = this.#assessDamage(roadBorders, traffic);
         }
+
         if(this.sensor){
             this.sensor.update(roadBorders, traffic);
-            const offsets=this.sensor.readings.map(
-                s=>s==null?0:1-s.offset);    // if sensor not reading anything - set its value to 0, else 1-offset to receive low values if the object is far and high values if object is close
+
+            // if sensor not reading anything - set its value to 0, else 1-offset to receive low values if the object is far and high values if object is close
+            const offsets = this.sensor.readings.map(s => s == null ? 0 : 1 - s.offset);    
             
-            const outputs=NeuralNetwork.feedForward(offsets, this.brain); // call the Neural Network's feed forward function and get outputs
+            const outputs = NeuralNetwork.feedForward(offsets, this.brain); // call the Neural Network's feed forward function and get outputs
     
 
             if(this.useBrain){
@@ -50,95 +50,73 @@ class Car {
 
     #assessDamage(roadBorders, traffic) {
         for (let i = 0; i < roadBorders.length; i++) {
-            if(polysIntersect(this.polygon,roadBorders[i])){
-                return true;
-            }
+            if(polysIntersect(this.polygon, roadBorders[i])) return true;
         }
         for (let i = 0; i < traffic.length; i++) {
-            if(polysIntersect(this.polygon,traffic[i].polygon)){
-                return true;
-            }
+            if(polysIntersect(this.polygon, traffic[i].polygon)) return true;
         }
         return false;            
-        
     }
 
     #createPolygon() {
-        const points=[];
-        const rad=Math.hypot(this.width,this.height)/2; // get rect's 'radius'
-        const alpha=Math.atan2(this.width, this.height); // get angle between x axis and radius
+        const points = [];
+        const rad = Math.hypot(this.width, this.height)/2; // get rect's 'radius'
+        const alpha = Math.atan2(this.width, this.height); // get angle between x axis and radius
+
         points.push({
-            x:this.x-Math.sin(this.angle-alpha)*rad,    
-            y:this.y-Math.cos(this.angle-alpha)*rad     
+            x: this.x - Math.sin(this.angle - alpha) * rad,    
+            y: this.y - Math.cos(this.angle - alpha) * rad     
         });        
+
         points.push({
-            x:this.x-Math.sin(this.angle+alpha)*rad,    
-            y:this.y-Math.cos(this.angle+alpha)*rad     
+            x: this.x - Math.sin(this.angle + alpha) * rad,    
+            y: this.y - Math.cos(this.angle + alpha) * rad     
         });
+
         points.push({
-            x:this.x-Math.sin(Math.PI+this.angle-alpha)*rad,    
-            y:this.y-Math.cos(Math.PI+this.angle-alpha)*rad     
-        });        
+            x: this.x - Math.sin(Math.PI + this.angle - alpha) * rad,    
+            y: this.y - Math.cos(Math.PI + this.angle - alpha) * rad     
+        });      
+
         points.push({
-            x:this.x-Math.sin(Math.PI+this.angle+alpha)*rad,    
-            y:this.y-Math.cos(Math.PI+this.angle+alpha)*rad     
+            x: this.x - Math.sin(Math.PI + this.angle + alpha) * rad,    
+            y: this.y - Math.cos(Math.PI + this.angle + alpha) * rad     
         });
+
         return points;
     }
 
     #move() {
         // vertical controls
-        if (this.controls.forward) {
-            this.speed += this.acceleration;
-        }
-        if(this.controls.reverse){
-            this.speed -= this.acceleration;
-        }
+        if (this.controls.forward) this.speed += this.acceleration;
+        if(this.controls.reverse) this.speed -= this.acceleration;
+        
         //max speed        
-        if(this.speed > this.maxSpeed){
-            this.speed = this.maxSpeed;
-        }
+        if(this.speed > this.maxSpeed) this.speed = this.maxSpeed;
 
-        if(this.speed < -this.maxSpeed/2)
-        {
-            this.speed = -this.maxSpeed/2;
-        }
+        if(this.speed < -this.maxSpeed / 2) this.speed = -this.maxSpeed/2;
 
         //friction
-        if (this.speed > 0) {
-            this.speed -= this.friction;
-        }
+        if (this.speed > 0) this.speed -= this.friction;
 
-        if (this.speed < 0) {
-            this.speed+=this.friction;
-        }
-        if(Math.abs(this.speed)<this.friction) {
-            this.speed = 0;
-        }
+        if (this.speed < 0) this.speed += this.friction;
+
+        if(Math.abs(this.speed) < this.friction) this.speed = 0;
 
         //turning
         if (this.speed != 0){
-            const flip = this.speed>0?1:-1;
+            const flip = this.speed > 0 ? 1 : -1;
         
-            if (this.controls.left){
-                this.angle+=0.03*flip;
-            }
-            if (this.controls.right){
-                this.angle-=0.03*flip;
-            }
+            if (this.controls.left) this.angle += 0.03 * flip;
+            if (this.controls.right) this.angle -= 0.03 * flip;
         }
 
-        this.x-=Math.sin(this.angle)*this.speed;
-        this.y-=Math.cos(this.angle)*this.speed;
+        this.x -= Math.sin(this.angle) * this.speed;
+        this.y -= Math.cos(this.angle) * this.speed;
     }
 
     draw(ctx, color, drawSensor=false) {
-        if (this.damaged) {
-            ctx.fillStyle="gray";
-
-        } else {
-            ctx.fillStyle=color;
-        }
+        ctx.fillStyle= this.damaged ? "gray" : ctx.fillStyle=color;
 
         ctx.beginPath();
         ctx.moveTo(this.polygon[0].x, this.polygon[0].y);
@@ -146,10 +124,7 @@ class Car {
             ctx.lineTo(this.polygon[i].x, this.polygon[i].y);
         }
 
-
         ctx.fill();
-        if(this.sensor && drawSensor)
-            this.sensor.draw(ctx);
+        if(this.sensor && drawSensor) this.sensor.draw(ctx);
     }
-
 }
