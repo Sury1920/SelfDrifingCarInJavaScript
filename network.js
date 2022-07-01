@@ -1,6 +1,6 @@
 class NeuralNetwork {
     constructor (neuronCounts){                                 // construct neural network using an Array specifying number of neurons in each layer
-        this.levels = [];                                         // neural network is an array of levels
+        this.levels=[];                                         // neural network is an array of levels
         for (let i = 0; i < neuronCounts.length-1; i++) {       // for each layer
             this.levels.push(new Level(                         // create a level and push onto levels array
                 neuronCounts[i], neuronCounts[i+1]              // that will have input size of neuronCounts[i] and output size of neuronCounts[i+1]
@@ -8,7 +8,7 @@ class NeuralNetwork {
         }
     }
     static feedForward(givenInputs, network) {                  // given inputs and a network
-        let outputs = Level.feedForward(                          // get the outputs
+        let outputs=Level.feedForward(                          // get the outputs
             givenInputs, network.levels[0]);                    // by calling the first level
         for (let i = 1; i < network.levels.length; i++) {       // loop through remaining levels
             outputs=Level.feedForward(                          // and get the outputs
@@ -21,8 +21,8 @@ class NeuralNetwork {
     // MUTATE THE NETWORK
     static mutate(network, amount=1){
         network.levels.forEach(level => {
-            for (let i = 0; i < level.biases.length; i++){
-                level.biases[i] = lerp(
+            for (let i=0; i<level.biases.length; i++){
+                level.biases[i]=lerp(
                     level.biases[i],
                     Math.random()*2-1,
                     amount
@@ -32,7 +32,7 @@ class NeuralNetwork {
                 for (let j = 0; j < level.weights.length; j++) {
                     level.weights[i][j]=lerp(
                         level.weights[i][j],
-                        Math.random() * 2 - 1,
+                        Math.random()*2-1,
                         amount
                     )
                 }
@@ -55,28 +55,31 @@ class Level {
     }
     static #randomize(level) { 
         // pick random weights
-        for(let i = 0; i < level.inputs.length; i++) {
+        for(let i=0; i<level.inputs.length;i++) {
             for (let j = 0; j < level.outputs.length; j++) {    // for each input-output pair in given level
-                level.weights[i][j]=Math.random() * 2 - 1;          // assign weight value between -1 and 1
+                level.weights[i][j]=Math.random()*2-1;          // assign weight value between -1 and 1
             }
         }
         // pick random biases
-        for (let i = 0; i < level.biases.length; i++) {             // for each output in given level...
-            level.biases[i] = Math.random() * 2 - 1;                  // assign bias value between -1 and 1
+        for (let i=0; i<level.biases.length; i++) {             // for each output in given level...
+            level.biases[i]=Math.random()*2-1;                  // assign bias value between -1 and 1
         }
     }
 
     static feedForward(givenInputs, level) {                    // using feed-forward algorithm
         for (let i = 0; i < level.inputs.length; i++) {         // for each input
-            level.inputs[i] = givenInputs[i];                     // assign value from the car sensors
+            level.inputs[i]=givenInputs[i];                     // assign value from the car sensors
         }
         for (let i = 0; i < level.outputs.length; i++) {         // for each output
             let sum = 0;                                        // 1.   calculate sum
             for (let j = 0; j < level.inputs.length; j++) {      //      consisting of
-                sum+=level.inputs[j] * level.weights[j][i];        //      each input value * weight of each input-output pair
+                sum+=level.inputs[j]*level.weights[j][i];        //      each input value * weight of each input-output pair
             }
-            
-            level.outputs == sum > level.biases[i] ? 1 : 0;     // 2.   check if sum is greater than this output's bias value (if so - activate the output, else - dont' activate it)
+            if(sum>level.biases[i]) {                           // 2.   check if sum is greater than this output's bias value
+                level.outputs[i]=1;                             //      if so - activate the output
+            } else {
+                level.outputs[i]=0;                             //      else - don't activate it
+            }
         }
         return level.outputs;    
     }
