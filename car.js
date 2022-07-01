@@ -36,8 +36,8 @@ class Car {
             const offsets=this.sensor.readings.map(
                 s=>s==null?0:1-s.offset);    // if sensor not reading anything - set its value to 0, else 1-offset to receive low values if the object is far and high values if object is close
             
-            const outputs=NeuralNetwork.feedForward(offsets, this.brain);
-            console.log(outputs);
+            const outputs=NeuralNetwork.feedForward(offsets, this.brain); // call the Neural Network's feed forward function and get outputs
+    
 
             if(this.useBrain){
                 this.controls.forward=outputs[0];
@@ -132,17 +132,12 @@ class Car {
         this.y-=Math.cos(this.angle)*this.speed;
     }
 
-    draw(ctx, color) {
+    draw(ctx, color, drawSensor=false) {
         if (this.damaged) {
             ctx.fillStyle="gray";
 
         } else {
             ctx.fillStyle=color;
-            var img = new Image();
-            img.src = "pink_car.png";
-            img.onload = function() {
-            ctx.drawImage(img, 0, 0, carCanvas.width, carCanvas.height);
-            }
         }
 
         ctx.beginPath();
@@ -150,8 +145,10 @@ class Car {
         for (let i = 1; i < this.polygon.length; i++) {
             ctx.lineTo(this.polygon[i].x, this.polygon[i].y);
         }
+
+
         ctx.fill();
-        if(this.sensor)
+        if(this.sensor && drawSensor)
             this.sensor.draw(ctx);
     }
 

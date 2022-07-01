@@ -2,8 +2,29 @@ body {
     margin: 0;
     background-color: darkgray;
     overflow: hidden;
-    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
+#buttons {
+    display:flex;
+    flex-direction: column;
+}
+
+button {
+    background-color: lightblue;
+    color: black;
+    border-radius: 3px;
+    border: none;
+    padding: 15px;
+    margin:5px;
+    cursor: pointer;
+}
+button:hover {
+    background-color: darkblue;
+    color: yellow;
+}
+
 #networkCanvas {
     background-color: darkblue;
 }
