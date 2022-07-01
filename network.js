@@ -20,6 +20,8 @@ class NeuralNetwork {
 
     // MUTATE THE NETWORK
     static mutate(network, amount=1){
+        if(amount < 0.01) amount = 0.01;
+        console.log(amount)
         network.levels.forEach(level => {
             for (let i=0; i<level.biases.length; i++){
                 level.biases[i]=lerp(
